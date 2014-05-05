@@ -1,3 +1,5 @@
+Set-StrictMode -version Latest
+
 $yearVersionMap = @{
     '2013' = '12.0';
     '2012' = '11.0';
@@ -47,3 +49,32 @@ function printInstalledVCVersions() {
     "Detected Visual Studio Installs:`n"
     $versions | % {"`tVisual Studio " + $_.Key + ' (' + $_.Value + ')'}
 }
+
+# returns current environment variables as a hash table
+function getEnvVarTable() {
+    gci env: | % {$vars = @{}} {$vars[$_.Key] = $_.Value} {$vars}
+}
+
+# returns a hash representing the difference between left and right
+function diffHashTables($left, $right) {
+    $newRightVars = $right.GetEnumerator() | ? {!$left.ContainsKey($_.Key)}
+    $missingRightVars = $left.GetEnumerator() | ? {!$right.ContainsKey($_.Key)}
+    $newRightVars.GetType()
+    @{
+        "addedVars" = $newRightVars;
+        "removedVars" = $missingRightVars;
+    }
+}
+
+# executes a batch file, and captures the environment variable settings
+function execBatchFile($file, $args = '') {
+    $cmd = "`"$file`" $args & set"
+    $newVars = cmd /c $cmd | % {$vars = @{}} {$prop, $val = $_.split('='); $vars[$prop] = $val} {$vars}
+    $oldVars = getEnvVarTable
+    diffHashTables $oldVars $newVars
+}
+
+$vcPath = getVCInstallPath '2013'
+$batPath = Join-Path $vcPath 'vcvarsall.bat'
+$arch = $env:PROCESSOR_ARCHITECTURE
+execBatchFile $batPath $arch
