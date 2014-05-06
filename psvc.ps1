@@ -55,14 +55,44 @@ function getEnvVarTable() {
     gci env: | % {$vars = @{}} {$vars[$_.Key] = $_.Value} {$vars}
 }
 
+# converts an array of hash table entries to a hash table
+function arrayToHashTable() {
+    $hashTable = @{}
+    foreach($entry in $input) {
+        $hashTable[$entry.Key] = $entry.Value
+    }
+
+    $hashTable
+}
+
+# takes in a paths string, returns an array
+function getPathsAsArray($path) {
+    $path.split(';') | % {$_.Trim()} | ? {$_} | unique
+}
+
+# returns paths added to right at the beginning and end as a pair
+function diffPathsArrays($left, $right) {
+    $prefix = $suffix = $null
+    if ($left[0] -eq $right[0]) {
+        "Same beginning..."
+    }
+    if ($left[-1] -eq $right[-1]) {
+        "Same ending..."
+    }
+    $prefix, $suffix
+}
+
 # returns a hash representing the difference between left and right
 function diffHashTables($left, $right) {
-    $newRightVars = $right.GetEnumerator() | ? {!$left.ContainsKey($_.Key)}
-    $missingRightVars = $left.GetEnumerator() | ? {!$right.ContainsKey($_.Key)}
-    $newRightVars.GetType()
+    $leftPaths = getPathsAsArray $($left["path"])
+    $rightPaths = getPathsAsArray $($right["path"])
+    $leftPaths, " ", $rightPaths
+    $addedPathsPrefix, $addedPathsSuffix = diffPathsArrays $leftPaths $rightPaths
     @{
-        "addedVars" = $newRightVars;
-        "removedVars" = $missingRightVars;
+        "addedVars" = $right.GetEnumerator() | ? {!$left.ContainsKey($_.Key)} | arrayToHashTable;
+        "removedVars" = $left.GetEnumerator() | ? {!$right.ContainsKey($_.Key)} | arrayToHashTable;
+        "addedPathsPrefix" = $addedPathsPrefix;
+        "addedPathsSuffix" = $addedPathsSuffix;
     }
 }
 
