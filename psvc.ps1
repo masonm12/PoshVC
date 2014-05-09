@@ -1,5 +1,40 @@
 Set-StrictMode -version Latest
 
+$psvcVersion = '1.0.0'
+$commandHelp = @{
+    'version' = 'Print the version number.';
+    'help' = 'Print this help message.';
+    'list' = 'Print all detected versions of Visual C.';
+    'use' = 'Import vcvarsall for a given version of Visual C (e.g. 2013, 10.0, etc).';
+}
+$psvcUsage = "usage psvc [--version] [--help] command args
+    
+optional arguments:
+    --version $($commandHelp['version'])
+    --help    $($commandHelp['help'])
+
+commands:
+    list      $($commandHelp['list'])
+    use       $($commandHelp['use'])
+"
+$listUsage = "usage psvc list [--help]
+$($commandHelp['list'])
+
+optional arguments:
+    --help $($commandHelp['help'])
+"
+$useUsage = "usage psvc use [version] [architecture]
+$($commandHelp['use'])
+
+optional arguments:
+    --help $($commandHelp['help'])
+
+arguments:
+    version      Version of Visual C vcvarsall to try and import.
+                 (default: latest)
+    architecture Tools architecture to load, passed to vcvarsall.
+                 (default: $env:PROCESSOR_ARCHITECTURE)
+"
 $yearVersionMap = @{
     '2013' = '12.0';
     '2012' = '11.0';
@@ -47,7 +82,7 @@ function printInstalledVCVersions() {
     $versions = $yearVersionMap.GetEnumerator() | sort @{e={$_.Value -as [Decimal]}; descending=$true} |
         ? {getVCInstallPath $_.Value}
     "Detected Visual Studio Installs:`n"
-    $versions | % {"`tVisual Studio " + $_.Key + ' (' + $_.Value + ')'}
+    $versions | % {"`    Visual Studio " + $_.Key + ' (' + $_.Value + ')'}
 }
 
 # returns the highest version of vc installed
@@ -68,12 +103,16 @@ function errorOut($message) {
     exit 1
 }
 
+function invalidArguments($arguments = $args) {
+    errorOut "Invalid arguments $arguments"
+}
+
 # will attempt to use the given VC version
 function useVCVersion($version, $architecture) {
-    if ($version.ToString().ToLower() -eq "latest") {
+    if ($version -eq 'latest') {
         $version = getNewestVCInstallPath
         if (!$version) {
-            errorOut "No version of Visual C was found."
+            errorOut 'No version of Visual C was found.'
         }
     }
 
@@ -83,5 +122,69 @@ function useVCVersion($version, $architecture) {
     }
 
     $batPath = Join-Path $vcPath 'vcvarsall.bat'
-    execBatchFile $batPath $arch
+    execBatchFile $batPath $architecture
+}
+
+# checks if a value exists in an array list
+# then removes it
+function checkAndPop($arrayList, $value) {
+    if ($arrayList -contains $value) {
+        $arrayList.remove($value)
+        $true
+    }
+}
+
+# time to parse some args!
+$commands = New-Object System.Collections.ArrayList
+$commands.addRange($args)
+$version = $(checkAndPop $commands '--version') -or $(checkAndPop $commands 'version')
+$help = $(checkAndPop $commands '--help') -or $(checkAndPop $commands 'help')
+
+if ($version) {
+    if ($help -or $commands) {
+        invalidArguments
+    }
+
+    "psvc version $psvcVersion"
+    exit 0
+}
+
+if (!$commands) {
+    $psvcUsage
+    exit 0
+}
+
+if ($commands[0] -eq 'list') {
+    $commands.removeAt(0)
+    if ($help) {
+        $listUsage
+    }
+    elseif ($commands) {
+        invalidArguments $commands
+    }
+    else {
+        printInstalledVCVersions
+    }
+    exit 0
+}
+
+if ($commands[0] -eq 'use') {
+    $commands.removeAt(0)
+    if ($help) {
+        $useUsage
+        exit 0
+    }
+    
+    $vcVersion = 'latest'
+    $architecture = $env:PROCESSOR_ARCHITECTURE
+    if ($commands) {
+        $vcVersion = $commands[0]
+        $commands.removeAt(0)
+    }
+    if ($commands) {
+        $architecture = $commands[0]
+        $commands.removeAt(0)
+    }
+    useVCVersion $vcVersion $architecture
+    exit 0
 }
