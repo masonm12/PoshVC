@@ -50,58 +50,10 @@ function printInstalledVCVersions() {
     $versions | % {"`tVisual Studio " + $_.Key + ' (' + $_.Value + ')'}
 }
 
-# returns current environment variables as a hash table
-function getEnvVarTable() {
-    gci env: | % {$vars = @{}} {$vars[$_.Key] = $_.Value} {$vars}
-}
-
-# converts an array of hash table entries to a hash table
-function arrayToHashTable() {
-    $hashTable = @{}
-    foreach($entry in $input) {
-        $hashTable[$entry.Key] = $entry.Value
-    }
-
-    $hashTable
-}
-
-# takes in a paths string, returns an array
-function getPathsAsArray($path) {
-    $path.split(';') | % {$_.Trim()} | ? {$_} | unique
-}
-
-# returns paths added to right at the beginning and end as a pair
-function diffPathsArrays($left, $right) {
-    $prefix = $suffix = $null
-    if ($left[0] -eq $right[0]) {
-        "Same beginning..."
-    }
-    if ($left[-1] -eq $right[-1]) {
-        "Same ending..."
-    }
-    $prefix, $suffix
-}
-
-# returns a hash representing the difference between left and right
-function diffHashTables($left, $right) {
-    $leftPaths = getPathsAsArray $($left["path"])
-    $rightPaths = getPathsAsArray $($right["path"])
-    $leftPaths, " ", $rightPaths
-    $addedPathsPrefix, $addedPathsSuffix = diffPathsArrays $leftPaths $rightPaths
-    @{
-        "addedVars" = $right.GetEnumerator() | ? {!$left.ContainsKey($_.Key)} | arrayToHashTable;
-        "removedVars" = $left.GetEnumerator() | ? {!$right.ContainsKey($_.Key)} | arrayToHashTable;
-        "addedPathsPrefix" = $addedPathsPrefix;
-        "addedPathsSuffix" = $addedPathsSuffix;
-    }
-}
-
 # executes a batch file, and captures the environment variable settings
 function execBatchFile($file, $args = '') {
     $cmd = "`"$file`" $args & set"
-    $newVars = cmd /c $cmd | % {$vars = @{}} {$prop, $val = $_.split('='); $vars[$prop] = $val} {$vars}
-    $oldVars = getEnvVarTable
-    diffHashTables $oldVars $newVars
+    cmd /c $cmd | % {$prop, $val = $_.split('='); Set-Item -path env:$prop -value $val}
 }
 
 $vcPath = getVCInstallPath '2013'
