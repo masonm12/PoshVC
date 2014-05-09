@@ -50,6 +50,12 @@ function printInstalledVCVersions() {
     $versions | % {"`tVisual Studio " + $_.Key + ' (' + $_.Value + ')'}
 }
 
+# returns the highest version of vc installed
+function getNewestVCInstallPath() {
+    $yearVersionMap.GetEnumerator() | sort @{e={$_.Value -as [Decimal]}; descending=$true} |
+        % {getVCInstallPath $_.Value} | ? {$_} | select -first 1
+}
+
 # executes a batch file, and captures the environment variable settings
 function execBatchFile($file, $args = '') {
     $cmd = "`"$file`" $args & set"
@@ -60,3 +66,4 @@ $vcPath = getVCInstallPath '2013'
 $batPath = Join-Path $vcPath 'vcvarsall.bat'
 $arch = $env:PROCESSOR_ARCHITECTURE
 execBatchFile $batPath $arch
+getNewestVCInstallPath
