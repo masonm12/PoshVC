@@ -53,7 +53,7 @@ function printInstalledVCVersions() {
 # returns the highest version of vc installed
 function getNewestVCInstallPath() {
     $yearVersionMap.GetEnumerator() | sort @{e={$_.Value -as [Decimal]}; descending=$true} |
-        % {getVCInstallPath $_.Value} | ? {$_} | select -first 1
+        ? {getVCInstallPath $_.Value} | % {$_.Value} | select -first 1
 }
 
 # executes a batch file, and captures the environment variable settings
@@ -62,8 +62,26 @@ function execBatchFile($file, $args = '') {
     cmd /c $cmd | % {$prop, $val = $_.split('='); Set-Item -path env:$prop -value $val}
 }
 
-$vcPath = getVCInstallPath '2013'
-$batPath = Join-Path $vcPath 'vcvarsall.bat'
-$arch = $env:PROCESSOR_ARCHITECTURE
-execBatchFile $batPath $arch
-getNewestVCInstallPath
+# writes out a message, and exits
+function errorOut($message) {
+    $host.ui.WriteErrorLine($message)
+    exit 1
+}
+
+# will attempt to use the given VC version
+function useVCVersion($version, $architecture) {
+    if ($version.ToString().ToLower() -eq "latest") {
+        $version = getNewestVCInstallPath
+        if (!$version) {
+            errorOut "No version of Visual C was found."
+        }
+    }
+
+    $vcPath = getVCInstallPath $version
+    if (!$vcPath) {
+        errorOut "Visual C version $version not found."
+    }
+
+    $batPath = Join-Path $vcPath 'vcvarsall.bat'
+    execBatchFile $batPath $arch
+}
