@@ -135,6 +135,8 @@ function useVCVersion($version, $architecture) {
 
     $batPath = Join-Path $vcPath 'vcvarsall.bat'
     execBatchFile $batPath $architecture
+
+    "Using Visual C $version $architecture"
 }
 
 # checks if a value exists in an array list
@@ -190,13 +192,15 @@ if ($commands[0] -eq 'use') {
     $vcVersion = 'latest'
     $architecture = $env:PROCESSOR_ARCHITECTURE
     if ($commands) {
-        $vcVersion = $commands[0]
+        $vcVersion = $commands[0].ToString().ToLower()
         $commands.removeAt(0)
     }
     if ($commands) {
-        $architecture = $commands[0]
+        $architecture = $commands[0].ToString().ToLower()
         $commands.removeAt(0)
     }
     useVCVersion $vcVersion $architecture
     exit 0
 }
+
+invalidArguments $commands
