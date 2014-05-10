@@ -92,9 +92,21 @@ function getNewestVCInstallPath() {
 }
 
 # executes a batch file, and captures the environment variable settings
-function execBatchFile($file, $args = '') {
-    $cmd = "`"$file`" $args & set"
-    cmd /c $cmd | % {$prop, $val = $_.split('='); Set-Item -path env:$prop -value $val}
+function execBatchFile($file, $arguments = '') {
+    try {
+        $ErrorActionPreference = "Stop" # Make all errors terminating
+        $cmd = "`"$file`" $arguments & set"
+        cmd /c $cmd | % {$prop, $val = $_.split('='); Set-Item -path env:$prop -value $val}
+    }
+    # see if the command with not set gives useful info
+    catch {
+        $host.ui.WriteErrorLine("Error calling $file $arguments")
+        $cmd = "`"$file`" $arguments"
+        cmd /c $cmd
+    }
+    finally {
+        $ErrorActionPreference = "Continue" # restore default
+    }
 }
 
 # writes out a message, and exits
