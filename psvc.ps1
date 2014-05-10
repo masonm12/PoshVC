@@ -43,7 +43,7 @@ $yearVersionMap = @{
 }
 
 # returns registry root (wow6432node, etc)
-function getSoftwareRegRoot($hkey) {
+function getSoftwareRegRoot() {
     $regRoot = 'HKLM:\SOFTWARE\Wow6432Node'
     # if an pointer is 4 bytes, then we're 32-bit!
     if ([IntPtr]::size -eq 4) {
