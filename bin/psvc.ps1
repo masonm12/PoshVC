@@ -190,7 +190,7 @@ if ($commands[0] -eq 'use') {
     }
     
     $vcVersion = 'latest'
-    $architecture = $env:PROCESSOR_ARCHITECTURE
+    $architecture = $env:PROCESSOR_ARCHITECTURE.ToLower()
     if ($commands) {
         $vcVersion = $commands[0].ToString().ToLower()
         $commands.removeAt(0)
