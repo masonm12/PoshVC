@@ -4,9 +4,13 @@ PowerShell tool to help with Visual C batch files.
 
 ## Installation
 
-Install with [Scoop](http://scoop.sh) from my personal [Scoop Bucket](https://github.com/masonm12/ScoopBucket).
+Install with [Scoop](http://scoop.sh) from my personal [Scoop Bucket](https://github.com/masonm12/ScoopBucket):
 
 	scoop install poshvc
+	
+Or install directly:
+
+	scoop install https://raw.githubusercontent.com/masonm12/ScoopBucket/master/poshvc.json
 
 ## Usage
 
