@@ -1,4 +1,4 @@
-# PSVC
+# PoshVC
 
 PowerShell tool to help with Visual C batch files.
 
@@ -6,7 +6,7 @@ PowerShell tool to help with Visual C batch files.
 
 Install with [Scoop](http://scoop.sh) from my personal [Scoop Bucket](https://github.com/masonm12/ScoopBucket).
 
-	scoop install psvc
+	scoop install poshvc
 
 ## Usage
 
@@ -14,8 +14,8 @@ Install with [Scoop](http://scoop.sh) from my personal [Scoop Bucket](https://gi
 
 Defaults to latest, and current architecture.
 
-	psvc use [version] [architecture]
+	poshvc use [version] [architecture]
 
 ### List Installed Visual C Versions
 
-	psvc list
+	poshvc list
