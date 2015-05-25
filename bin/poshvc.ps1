@@ -1,13 +1,14 @@
 Set-StrictMode -version Latest
 
-$psvcVersion = '1.0.0'
+$psvcName = 'poshvc'
+$psvcVersion = '1.0.1'
 $commandHelp = @{
     'version' = 'Print the version number.';
     'help' = 'Print this help message.';
     'list' = 'Print all detected versions of Visual C.';
     'use' = 'Import vcvarsall for a given version of Visual C (e.g. 2013, 10.0, etc).';
 }
-$psvcUsage = "usage psvc [--version] [--help] command args
+$psvcUsage = "usage $psvcName [--version] [--help] command args
     
 optional arguments:
     --version $($commandHelp['version'])
@@ -17,13 +18,13 @@ commands:
     list      $($commandHelp['list'])
     use       $($commandHelp['use'])
 "
-$listUsage = "usage psvc list [--help]
+$listUsage = "usage $psvcName list [--help]
 $($commandHelp['list'])
 
 optional arguments:
     --help $($commandHelp['help'])
 "
-$useUsage = "usage psvc use [version] [architecture]
+$useUsage = "usage $psvcName use [version] [architecture]
 $($commandHelp['use'])
 
 optional arguments:
@@ -159,7 +160,7 @@ if ($version) {
         invalidArguments
     }
 
-    "psvc version $psvcVersion"
+    "$psvcName version $psvcVersion"
     exit 0
 }
 
