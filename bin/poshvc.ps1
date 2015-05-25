@@ -1,7 +1,7 @@
 Set-StrictMode -version Latest
 
 $psvcName = 'poshvc'
-$psvcVersion = '1.0.1'
+$psvcVersion = '1.1.0'
 $commandHelp = @{
     'version' = 'Print the version number.';
     'help' = 'Print this help message.';
@@ -37,6 +37,7 @@ arguments:
                  (default: $env:PROCESSOR_ARCHITECTURE)
 "
 $yearVersionMap = @{
+    '2015' = '14.0';
     '2013' = '12.0';
     '2012' = '11.0';
     '2010' = '10.0';
