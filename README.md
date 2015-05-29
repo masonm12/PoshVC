@@ -10,7 +10,7 @@ Install with [Scoop](http://scoop.sh) from my personal [Scoop Bucket](https://gi
 	
 Or install directly:
 
-	scoop install https://raw.githubusercontent.com/masonm12/ScoopBucket/master/poshvc.json
+	scoop install https://raw.githubusercontent.com/masonm12/scoop-personal/master/poshvc.json
 
 ## Usage
 
