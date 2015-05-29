@@ -1,7 +1,7 @@
 Set-StrictMode -version Latest
 
 $psvsName = 'poshvs'
-$psvsVersion = '1.1.0'
+$psvsVersion = '1.1.1'
 $commandHelp = @{
     'version' = 'Print the version number.';
     'help' = 'Print this help message.';
